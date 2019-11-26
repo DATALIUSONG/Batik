@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>需求计划查询页面</title>
+	<link rel="stylesheet" type="text/css" href="../../css/base.css">
+	<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+	<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+	<script type="text/javascript" src="../../layui/layui.js"></script>
+	<link rel="stylesheet" href="../../css/admin_css.css" />
+	<!-- 滚动条插件 -->
+	<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+	<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+	<!--	<script src="../../framework/jquery.mousewheel.min.js"></script>-->
+	<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+	<script src="../../js/out_intoData.js"></script>
+
+</head>
+<div class="console">
+	<form class="layui-form" action="">
+		<div class="layui-form-item">
+			<div class="layui-input-inline">
+				<input id="requestPlanCode" type="text" name="name" placeholder="输入需求计划编码" autocomplete="off" class="layui-input">
+			</div>
+			<div class="layui-input-inline">
+				<select id="requestPlanType" style="background: white;">
+					<option value="年度计划">年度计划</option>
+					<option value="月度计划">月度计划</option>
+					<option value="紧急计划">紧急计划</option>
+				</select>
+			</div>
+			<div class="layui-input-inline">
+				<input id="requestDeportment" type="text" name="name" placeholder="输入需求部门" autocomplete="off" class="layui-input">
+			</div>
+			<div class="layui-input-inline">
+				<input id="requestDate" type="text" class="layui-input" placeholder=" 计划年度">
+			</div>
+			<div class="layui-input-inline">
+				<input id="requestMonth" type="text" class="layui-input" placeholder=" 计划月份">
+			</div>
+			<button class="layui-btn" lay-submit lay-filter="formDemo" onclick="conditionQuery()">检索</button>
+		   </div>
+	</form>
+
+	<script>
+		layui.use(['form', 'laydate'], function() {
+			var form = layui.form;
+			var laydate = layui.laydate;
+
+			//监听提交
+			form.on('submit(formDemo)', function(data) {
+				layer.msg(JSON.stringify(data.field));
+				return false;
+			});
+
+			var newDate = new Date();
+			nowTime = newDate.getFullYear() + "-" + (newDate.getMonth() + 1);
+			laydate.render({
+				elem: '#requestMonth',
+				format: 'yyyyMM'
+			});
+
+			var newDate = new Date();
+			nowTime = newDate.getFullYear() + "-" + (newDate.getMonth() + 1);
+			laydate.render({
+				elem: '#requestDate',
+				format: 'yyyy'
+			});
+		});
+	</script>
+</div>
+<!--控制按钮-->
+<div class="console">
+	<div class="layui-form-item" style="margin-left: 40px;">
+		<a class="layui-btn"  id="query" onclick="conditionQuery()">条件查询</a>
+		<a class="layui-btn" href="base_modify.jsp" onclick="addbasicInfo('basicInfo')">修改</a>
+		<a class="layui-btn" onclick="printTable('dayindaju1')">打印</a>
+		<a class="layui-btn" href="../print/output.html" onclick="addbasicInfo('basicInfo')">导出</a>
+		<a class="layui-btn" onclick="addbasicInfo('basicInfo')">撤回</a>
+		<a class="layui-btn" onclick="addbasicInfo('basicInfo')">汇总至</a>
+		<a class="layui-btn" href="delete_list.jsp" onclick="menuCAClick('delete_list.jsp',this)">删除</a>
+		<a class="layui-btn" href="base_customNewList.jsp" onclick="addbasicInfo('basicInfo')">关闭/退出</a>
+	</div>
+</div>
+<div style="height:500px;background: white;margin: 0 auto;overflow-y:scroll;padding-bottom: 15px;margin-left: 12px;margin-right: 12px;">
+	<!--阴影效果-->
+	<div style="width: 100%;height: 5px;background: #E7EBED;"></div>
+	<!--表格部分-->
+	<table>
+		<thead>
+		<!--<th><input type="checkbox" id="allAndNotAll" /> 选择</th>-->
+		<th>行号</th>
+		<th>选择</th>
+		<th>需求计划编号</th>
+		<th>需求计划类型</th>
+		<th>审批状态</th>
+		<th>需求计划状态</th>
+		<th>需求部门</th>
+		<th>需求计划月份</th>
+		<th>操作</th>
+		</thead>
+		<tbody id="t_body">
+		<!--显示数据部分-->
+		</tbody>
+	</table>
+	<!--底部分页部分-->
+	<div style="width: 100%;height: 50px;line-height: 50px;text-align: right;">
+		<button >上一页</button>
+		<button id="next_btn" style="margin-right: 12px;">下一页</button>
+	</div>
+</div>
+
+</div>
+<!--添加窗口部分，默认是隐藏的-->
+<div id="add_window">
+	<div class="first_div" style="width: 700px; height: 500px" >
+		<div class="first_first_div">
+			<!--新增弹出顶部-->
+			<div class="add_window_content_top">
+				<font id="addWinDesc">新增/编辑订单</font> <img id="close_window" src="../../images/close_btn.png" />
+			</div>
+			<!--表单上半部分内容-->
+			<div style="width: 100%; height: auto; position: relative;">
+				<div class="add_window_desc">
+					<font>* 需求计划类型</font>
+					<select id="requestPlanType1" name="requestPlanType">
+						<option value="年度计划">年度计划</option>
+						<option value="月度计划">月度计划</option>
+						<option value="紧急计划">紧急计划</option>
+					</select>
+				</div>
+				<div class="add_window_desc">
+					<font> 需求计划名称:</font> <input id="requestPlanCode1" required lay-verify="required" type="text" />
+				</div>
+				<div class="add_window_desc">
+					<font>需求计划部门:</font> <input id="requestDeportment1" type="text" />
+				</div>
+
+				<div class="add_window_desc">
+					<font> 计划月份 : </font> <input type="text" id="requestMonth1" />
+				</div>
+				<div class="add_window_desc">
+					<font> 计划年度: </font> <input type="text" id="requestDate1" />
+				</div>
+
+				<!--关闭按钮-->
+				<div style="width: 100%; height: 50px; text-align: center; margin-top: 30px;">
+					<!--<button style="width: 60px; height: 35px; background: #787878; margin-right: 20%;" onclick="close_add_win()">关闭</button>-->
+					<button class="layui-btn" lay-submit lay-filter="formDemo" onclick="conditionQuery1()">检索</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="../../js/jquery.js"></script>
+<script type="text/javascript">
+
+	layui.use(['form', 'laydate'], function() {
+		var form = layui.form;
+		var laydate = layui.laydate;
+
+		//监听提交
+		form.on('submit(formDemo)', function(data) {
+			layer.msg(JSON.stringify(data.field));
+			return false;
+		});
+
+		//系统时间设置
+		var newDate = new Date();
+		nowTime = newDate.getFullYear() + "-" + (newDate.getMonth() + 1);
+		laydate.render({
+			elem: '#requestMonth1',
+			format: 'yyyyMM'
+		});
+
+		var newDate = new Date();
+		nowTime = newDate.getFullYear() + "-" + (newDate.getMonth() + 1);
+		laydate.render({
+			elem: '#requestDate1',
+			format: 'yyyy'
+		});
+	});
+	layui.use(['form', 'laydate'], function() {
+		var form = layui.form;
+		var laydate = layui.laydate;
+
+		//监听提交
+		form.on('submit(formDemo)', function(data) {
+			layer.msg(JSON.stringify(data.field));
+			return false;
+		});
+
+		//系统时间设置
+		var newDate = new Date();
+		nowTime = newDate.getFullYear() + "-" + (newDate.getMonth() + 1);
+		laydate.render({
+			elem: '#requestMonth',
+			format: 'yyyyMM'
+		});
+
+		var newDate = new Date();
+		nowTime = newDate.getFullYear() + "-" + (newDate.getMonth() + 1);
+		laydate.render({
+			elem: '#requestDate',
+			format: 'yyyyMMdd'
+		});
+	});
+
+	loadGoodsListView();
+	//需求管理所对应的数据页面
+	function loadGoodsListView() {
+		console.log("添加的html内部js事件");
+		//1、新增弹出窗口事件
+		$("#add_operate").click(function() {
+			open_add_win();
+		});
+
+		//2、关闭弹出窗口事件
+		$("#close_window").click(function() {
+			close_add_win();
+		});
+	}
+
+	//打开新增窗口
+	open_add_win();
+	function open_add_win() {
+		$("#addWinDesc").html("需求计划查下/修改");
+		$("#saveBtn").attr("onclick", "addGoods()");
+		$("#add_window").css("display", "block");
+	}
+
+	//关闭新增窗口
+	function close_add_win() {
+		$("#add_window").css("display", "none");
+	}
+
+	//定义一个全局变量，用于存放欲被删除的行
+	var deleteValue = null;
+
+	//显示删除提示对话框
+	function show_dialog(el) {
+		deleteValue = $(el).attr("value");
+		$("#add_dialog_window").css("display", "block");
+
+	}
+
+	//隐藏删除提示对话框
+	function hide_dialog() {
+		//清空全局变量
+		deleteValue = null;
+		$("#add_dialog_window").css("display", "none");
+	}
+
+	//根据条件查询
+	function conditionQuery1() {
+
+		var requestPlanCode = $("#requestPlanCode1").val();
+		var requestPlanType = $("#requestPlanType1").val();
+		var requestDeportment = $("#requestDeportment1").val();
+		var requestDate = $("#requestDate1").val();
+		var requestMonth = $("#requestMonth1").val();
+
+		var json = {
+			requestPlanCode: requestPlanCode,
+			requestPlanType: requestPlanType,
+			requestDeportment: requestDeportment,
+			requestDate: requestDate,
+			requestMonth: requestMonth
+		}
+		//根据条件查询需求计划信息
+		$.ajax({
+			type: "GET",
+			url: "http://123.56.68.20:8080/Batik/request/conditionQuery",
+			data: json,
+			dataType: "json",
+			success: function(ret) {
+				console.log(JSON.stringify(ret));
+				if(ret.status == "1") {
+					alert("数据查询成功");
+					//关闭弹窗
+					close_add_win();
+					//重新刷新页面
+					showquerysList(ret.data);
+
+				}
+			}
+		});
+	}
+	//根据条件查询
+	function conditionQuery() {
+		// var requestPlanType = '年度计划';
+		var requestPlanCode = $("#requestPlanCode").val();
+		var requestPlanType = $("#requestPlanType").val();
+		var requestDeportment = $("#requestDeportment").val();
+		var requestDate = $("#requestDate").val();
+		var requestMonth = $("#requestMonth").val();
+
+		var json = {
+			requestPlanCode: requestPlanCode,
+			requestPlanType: requestPlanType,
+			requestDeportment: requestDeportment,
+			requestDate: requestDate,
+			requestMonth: requestMonth
+		}
+		//根据条件查询需求计划信息
+		$.ajax({
+			type: "GET",
+			url: "http://123.56.68.20:8080/Batik/request/conditionQuery",
+			data: json,
+			dataType: "json",
+			success: function(ret) {
+				console.log(JSON.stringify(ret));
+				if(ret.status == "1") {
+					alert("数据查询成功");
+					//重新刷新页面
+					showquerysList(ret.data);
+
+				}
+			}
+		});
+	}
+
+	function showquerysList(list) {
+		//添加先清空
+		$("#t_body").empty();
+		var html = '';
+		for(var i = 0; i < list.length; i++) {
+			html += '<tr id="' + list[i].materialTrackingCode + '">' +
+					'<td>' + i + '</td>' +
+					'<td>' + '<input type="checkbox" id="allAndNotAll" /> ' + '</td>' +
+					'<td>' + list[i][18] + '</td>' +
+					'<td>' + list[i][17] + '</td>' +
+					'<td>' + list[i][24] + '</td>' +
+					'<td>' + list[i][23] + '</td>' +
+					'<td>' + list[i][21] + '</td>' +
+					'<td>' + list[i][27] + '</td>';
+			html += '<td>' +
+					'	<div style="position: relative;">' +
+					'		<font onclick="chanagePage(' + '\'' + list[i][16] + '\'' + ')">查询</font>' +
+					'	</div>' +
+					'</td>' +
+					'</tr>';
+		}
+
+		$("#t_body").html(html);
+
+	}
+
+	function chanagePage(parameter) {
+		alert("跳转被点击");
+		var materialClassifyCode = parameter;
+		var url = 'base_query.jsp?materialClassifyCode=' + materialClassifyCode;
+		window.open(url);
+	}
+</script>
+
+</html>

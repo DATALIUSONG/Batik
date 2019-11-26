@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>物资提供方案弹出-1</title>
+				
+		<script type="text/javascript">
+		  function   check(vr)   {   
+		 	 //alert("没有被选中的"); 
+		 	var chec=document.getElementsByName("chifan");
+		 	var cf=document.getElementById("cf");
+		 	if(cf.checked){
+		 	//alert("没有被选中"); 
+		 	for (var int = 0; int < chec.length; int++) {
+		chec[int].disabled=false;
+		}
+		 	}else{
+		 	//alert("被选中"); 
+		 	for (var int = 0; int < chec.length; int++) {
+		chec[int].disabled=true;
+		}
+		 	}	 
+		  	}   
+		  	
+		</script>
+	</head>
+	<body>
+		<input type="checkbox" name="cf" id="cf"  onclick="check()">物料编码
+		<input type="checkbox" name="chifan" disabled="false"> 需求月份
+		 <input type="checkbox" name="chifan" disabled="false"> 期望供应商 
+		<input type="checkbox" name="chifan" disabled="false">固定供应商
+	</body>
+</html>

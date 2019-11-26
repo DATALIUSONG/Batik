@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+	<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+	<meta name="renderer" content="webkit">
+	<!--国产浏览器高速模式-->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="author" content="穷在闹市" />
+	<!-- 定义页面的最新版本 -->
+	<meta name="description" content="网站简介" />
+	<!-- 网站简介 -->
+	<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+	<title>物资维护方案</title>
+
+	<!-- 公共样式 开始 -->
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link rel="stylesheet" type="text/css" href="../css/admin_css.css">
+	<link rel="stylesheet" type="text/css" href="../css/iconfont.css">
+	<script type="text/javascript" src="../framework/jquery-1.11.3.min.js"></script>
+	<script type="text/javascript" src="../js/base.js"></script>
+	<link rel="stylesheet" type="text/css" href="../layui/css/layui.css">
+	<script type="text/javascript" src="../layui/layui.js"></script>
+	<link rel="stylesheet" href="../css/admin_css.css" />
+	<!-- 滚动条插件 -->
+	<link rel="stylesheet" type="text/css" href="../css/jquery.mCustomScrollbar.css">
+	<script src="../framework/jquery-ui-1.10.4.min.js"></script>
+	<script src="../framework/jquery.mousewheel.min.js"></script>
+	<script src="../framework/jquery.mCustomScrollbar.min.js"></script>
+	<!--<script src="../framework/cframe.js"></script>-->
+	<!-- 仅供所有子页面使用 -->
+	<!-- 公共样式 结束 -->
+
+	<style>
+		.box {
+			width: 70%;
+			margin-top: 10%;
+			margin: auto;
+			padding: 28px;
+			height: 80px;
+			background: #92B8B1;
+			border: 1px #111 solid;
+			display: none;
+			/* 默认对话框隐藏 */
+		}
+
+		.box.show {
+			display: block;
+		}
+
+		.box .x {
+			font-size: 18px;
+			text-align: right;
+			display: block;
+		}
+		/*.box input{width:80%; font-size:18px; margin-top:18px;}*/
+	</style>
+	<!--判断条件-->
+	<script type="text/javascript">
+		/**
+		 * 	汇总规则关闭函数
+		 * @param {Object} n
+		 */
+		function msgbox(n) {
+			document.getElementById('inputbox').style.display = n ? 'block' : 'none'; /* 点击按钮打开/关闭 对话框 */
+		}
+		/**
+		 *	合并规则传入后台函数
+		 */
+		function merge() {
+			//alert("已经点击了确定！！")
+			var attributes = document.getElementsByName("attr");
+			var status = 0;
+			if(attributes[0]) {
+				status += 8;
+			}
+			if(attributes[1].checked) {
+				status += 4;
+			}
+			if(attributes[2].checked) {
+				status += 2;
+			}
+			if(attributes[3].checked) {
+				status += 1;
+			}
+			//alert("状态值为：" + status)
+			//组装JSON对象
+			var json = {
+				mergeStatus: status
+
+			}
+			//组装ajax请求获取合并结果
+			$.ajax({
+				type: "POST",
+				url: "http://123.56.68.20:8080/Batik/purchase/merge",
+				data: json,
+				dataType: "json",
+				success: function(ret) {
+
+					if(ret.status == "1") {
+						//alert("合并成功！！")
+						msgbox(0);
+					}
+				}
+			});
+		}
+		/**
+		 * 生成采购计划函数
+		 */
+		function submitRequest() {
+			var requestPlanCode = document.getElementById("requestPlanCode").value;
+			//alert("已经拿到前端页面的需求计划编码");
+			var data = {
+				"requestPlanCode": requestPlanCode
+			}
+
+			$.ajax({
+				type: "post",
+				url: "http://123.56.68.20:8080/Batik/purchase/createPurchasePlan",
+				data: data,
+				dataType: "json",
+				success: function(ret) {
+					if(ret.status == "1") {
+						//alert("生成采购计划成功");
+						getUnwritePurchase();
+					}
+				}
+			});
+		}
+
+		function getUnwritePurchase() {
+			$.ajax({
+				type: "post",
+				url: "http://123.56.68.20:8080/Batik/purchase/getUnwritePurchase",
+				data: null,
+				dataType: "json",
+				success: function(ret) {
+					if(ret.status == "1") {
+						//alert("数据更新成功,正在调用方法解析后台传入的数据");
+						showUnwritePurchase(ret.data);
+					}
+				}
+			});
+
+		}
+
+		function showUnwritePurchase(data) {
+			$("#purchaseTable").empty();
+			html = '';
+			for(var i = 0; i < data.length; i++) {
+				html += '<tr id="' + data[i].id + '">' +
+						'<td>' + parseInt(i + 1) + '</td>' +
+						'<td> <input type="checkbox" name="printPlan" value="' + JSON.stringify(data[i]) + '"/> </td>' +
+						'<td>' + data[i].classificationCode + '</td>' +
+						'<td>' + data[i].classificationName + '</td>' +
+						'<td>' + data[i].materialCode + '</td>' +
+						'<td>' + data[i].materialName + '</td>' +
+						'<td>' + data[i].specification + '</td>' +
+						'<td>' + data[i].type + '</td>' +
+						'<td>' + data[i].unit + '</td>' +
+						'<td>' + data[i].quantity + '</td>' +
+						'<td>' + data[i].requestMonth + '</td>' +
+						'<td>' + data[i].requestDate + '</td>' +
+						'<td>' + data[i].sureSource + '</td>' +
+						'<td>' + data[i].fixedSupplier + '</td>' +
+						'<td>' + data[i].wishSupplier + '</td>' +
+						'<td>' + data[i].requestDeportment + '</td>' +
+						'<td>' + data[i].requestPlanCode + '</td>' +
+						'<td>' + data[i].supplyWay + '</td>' +
+						'<td>' + data[i].supplyQuantity + '</td>' +
+						'<td>' + data[i].availableStock + '</td>' +
+						'<td>' + data[i].quantityRoutes + '</td>' +
+						'<td>' + data[i].usedStock + '</td>' +
+						'<td>' + data[i].totalStock + '</td>' +
+						'<td>' + data[i].purchaseLeadTime + '</td>' +
+						'<td>' + data[i].purchaseDate + '</td>' +
+						'<td>' + data[i].materialTrackingCode + '</td>';
+				html += '<td>' +
+						'	<div style="position: relative;">' +
+						'		<font onclick="edit_win(' + '\'' + data.materialTrackingCode + '\'' + ')">修改</font>' +
+						'	</div>' +
+						'</td>' +
+						'</tr>';
+			}
+			$("#purchaseTable").html(html);
+		}
+
+		/**
+		 * 需求退回函数
+		 */
+		function requestBack() {
+			//alert("需求退回按钮被点击");
+			var requestPlanCode = document.getElementById("requestPlanCode").value;
+			var data = {
+				"planCode": requestPlanCode
+			}
+			$.ajax({
+				type: "post",
+				url: "http://123.56.68.20:8080/Batik/purchase/requestBack",
+				data: data,
+				dataType: "json",
+				success: function(ret) {
+					if(ret.status == "1") {
+						alert("退回成功");
+					}
+				}
+			});
+		}
+
+		/**
+		 * 关闭/退出函数
+		 */
+		function closeWin() {
+			alert("关闭/退出被点击！！")
+		}
+
+		/**
+		 * 打印函数
+		 */
+		function printRequest() {
+			//alert("打印被点击");
+			var requestPlanCode = document.getElementById("requestPlanCode").value;
+			//alert("需求计划编码" + requestPlanCode);
+			var planCode = '';
+			var data = {
+				"requestPlanCode": requestPlanCode
+			}
+			$.ajax({
+				type: "post",
+				url: "http://123.56.68.20:8080/Batik/purchase/getPurchasePlanCode",
+				data: data,
+				dataType: "json",
+				success: function(ret) {
+					if(ret.status == "1") {
+						alert("查询成功");
+						planCode += ret.data;
+					} else {
+						alert("查询失败");
+					}
+				}
+			});
+			var url = "../outPrintData.jsp?planCode=" + planCode;
+			window.open(url);
+		}
+
+		/**
+		 * 导出函数
+		 */
+		function importRequest() {
+			alert("导出被点击！！")
+		}
+
+		/**
+		 * 拆分函数
+		 */
+		function splitPlan() {
+			alert("拆分被点击")
+		}
+
+		/**
+		 * 取消合并函数
+		 */
+		function cancelMerge() {
+			alert("取消合并被点击")
+		}
+
+		function queryRequest() {
+			//alert("查询需求表信息方法被调用！");
+			$.ajax({
+				url: "http://123.56.68.20:8080/Batik/purchase/queryUpdate",
+				type: "GET",
+				data: null,
+				dataType: "json",
+				success: function(ret) {
+					if(ret.status == "1") {
+						alert(ret.message);
+						showRequestList(ret.data);
+					} else if(ret.status == "2") {
+						alert(ret.message);
+					} else {
+						alert(ret.message);
+					}
+				}
+			});
+		}
+
+		function showRequestList(list) {
+			alert("正在处理后台传入的数据")
+			//添加先清空
+			$("#purchaseTable").empty();
+
+			var html = '';
+			for(var i = 0; i < list.length; i++) {
+				html += '<tr id="' + list[i].id + '">' +
+						'<td>' + parseInt(i + 1) + '</td>' +
+						'<td > <input type="checkbox" name="printPlan" /> </td>' +
+						'<td id="classificationCode" >' + list[i].classificationCode + '</td>' +
+						'<td id="classificationName" >' + list[i].classificationName + '</td>' +
+						'<td id="materialCode" >' + list[i].materialCode + '</td>' +
+						'<td id="materialName" >' + list[i].materialName + '</td>' +
+						'<td id="specification" >' + list[i].specification + '</td>' +
+						'<td id="type" >' + list[i].type + '</td>' +
+						'<td id="unit" >' + list[i].unit + '</td>' +
+						'<td id="quantity" >' + list[i].quantity + '</td>' +
+						'<td id="requestMonth" >' + list[i].requestMonth + '</td>' +
+						'<td id="requestDate" >' + list[i].requestDate + '</td>' +
+						'<td id="sureSource" >' + list[i].sureSource + '</td>' +
+						'<td id="wishSupplier" >' + list[i].wishSupplier + '</td>' +
+						'<td id="fixedSupplier" >' + list[i].fixedSupplier + '</td>' +
+						'<td id="requestDeportment" >' + list[i].requestDeportment + '</td>' +
+						'<td id="requestPlanCode">' + list[i].requestPlanCode + '</td>' +
+						'<td id="materialTrackingCode">' + list[i].materialTrackingCode + '</td>' +
+						'<td> <font onclick="edit_win(' + '\'' + list[i].materialTrackingCode + '\'' + ')">需求退回</font> </td>' +
+						'<td> <font onclick="edit_win(' + '\'' + list[i].materialTrackingCode + '\'' + ')">打印</font> </td>' +
+						'<td> <font onclick="edit_win(' + '\'' + list[i].materialTrackingCode + '\'' + ')">保存</font> </td>' +
+						//'<td> <button id="requestModify" style="width:50px;height:35px;background-color:#209E85;color: #F1F1F1;" onclick="open_add_win()">修改</button> </td>' +
+						'</tr>';
+			}
+			$("#purchaseTable").html(html);
+		}
+		//需求管理所对应的数据页面
+		function loadGoodsListView() {
+
+			//1、新增弹出窗口事件
+			$("#add_operate").click(function() {
+				open_add_win();
+			});
+
+			//2、关闭弹出窗口事件
+			$("#close_window").click(function() {
+				close_add_win();
+			});
+		}
+
+		//打开新增窗口
+		function open_add_win() {
+			//新增前先清除之前可能被赋值过的input标签
+			//clearAddWindowValues();
+			$("#addWinDesc").html("新增需求");
+			$("#add_window").css("display", "block");
+		}
+
+		//关闭新增窗口
+		function close_add_win() {
+			$("#add_window").css("display", "none");
+		}
+
+		//打开编辑窗口
+		function edit_win(materialTrackingCode) {
+			$("#addWinDesc").html("需求计划详情");
+			$("#saveBtn").attr("onclick", "updateGoods()");
+			$("#add_window").css("display", "block");
+
+			var json = {
+				materialTrackingCode: materialTrackingCode
+			}
+
+			//根据需求物料编码查询订单信息
+			$.ajax({
+				url: "http://123.56.68.20:8080/Batik/goods/queryById",
+				type: "POST",
+				data: json,
+				dataType: "json",
+				success: function(ret) {
+					console.log(JSON.stringify(ret));
+					if(ret.status == "1") {
+						var obj = ret.data; //先给input标签赋值
+						$("#classificationCode").val(obj.classificationCode);
+						$("#classificationName").val(obj.classificationName);
+						$("#materialCode").val(obj.materialCode);
+						$("#materialName").val(obj.materialName);
+						$("#type").val(obj.type);
+						$("#specification").val(obj.specification);
+						$("#unit").val(obj.unit);
+						$("#quantity").val(obj.quantity);
+						$("#requestMonth").val(obj.requestMonth);
+						$("#requestDate").val(obj.requestDate);
+						$("#sureSource").val(obj.sureSource);
+						$("#wishSupplier").val(obj.wishSupplier);
+						$("#fixedSupplier").val(obj.fixedSupplier);
+						$("#remarks").val(obj.remarks);
+						$("#materialTrackingCode").val(obj.materialTrackingCode);
+						//$("#showChooseImage").attr("src", obj.goodsPicUrl);
+						$("#requestPlanType").val(obj.requestPlanType);
+						$("#requestPlanName").val(obj.requestPlanName);
+						$("#requestRemarks").val(obj.requestRemarks);
+						$("#requestDeportment").val(obj.requestDeportment);
+						$("#requestPerson").val(obj.requestPerson);
+						$("#requestPlanType1").val(obj.requestPlanType);
+						$("#requestPlanCode").val(obj.requestPlanCode);
+						$("#requestPlanName1").val(obj.requestPlanName);
+						$("#requestRemarks1").val(obj.requestRemarks);
+						$("#requestDeportment1").val(obj.requestDeportment);
+						$("#requestPerson1").val(obj.requestPerson);
+						$("#requestStatus1").val(obj.requestStatus);
+						$("#approvalStatus1").val(obj.approvalStatus);
+						//复制给全局变量
+						goodsUniqueId = materialTrackingCode;
+					}
+				}
+			});
+
+		}
+		//清除新增弹窗的input标签中的值
+		function clearAddWindowValues() {
+			$("#requestPlanType").val("");
+			$("#requestPlanName").val("");
+			$("#requestRemarks").val("");
+			$("#requestDeportment").val("");
+			$("#requestPerson").val("");
+			$("#classificationCode").val("");
+			$("#classificationName").val("");
+			$("#materialCode").val("");
+			$("#materialName").val("");
+			$("#type").val("");
+			$("#specification").val("");
+			$("#unit").val("");
+			$("#quantity").val("");
+			$("#requestMonth").val("");
+			$("#requestDate").val("");
+			$("#sureSource").val("");
+			$("#wishSupplier").val("");
+			$("#fixedSupplier").val("");
+			$("#remarks").val("");
+
+			//$("#showChooseImage").attr("src", "");
+		}
+
+		var goodsUniqueId = null;
+
+		//更新/编辑/修改申请表单
+		function updateGoods() {
+			//alert("详情页面，不可编辑，如果您需编辑进进入修改页面！！！");
+			//1、物料分类编码
+			var classificationCode = $("#classificationCode").val();
+			if(classificationCode == null || classificationCode == "") {
+				alert("请输入物料分类编码");
+				return;
+			}
+			//2、物料分类名称
+			var classificationName = $('#classificationName').val();
+
+			//3、物料编码
+			var materialCode = $("#materialCode").val();
+			if(materialCode == null || materialCode == "") {
+				alert("请输入物料编码");
+				return;
+			}
+			//4、物料名称
+			var materialName = $("#materialName").val();
+			if(materialName == null || materialName == "") {
+				alert("请输入需求人员");
+				return;
+			}
+			//5、物料规格
+			var type = "物料规格";
+			//6、物料型号
+			var specification = "物料型号";
+			//7、物料单位
+			var unit = $("#unit").val();
+			if(null == unit || "" == unit) {
+				alert("请选择物料分类编码");
+				//return;
+			}
+			//8、需求数量
+			var quantity = $("#quantity").val();
+			if(null == quantity || "" == quantity) {
+				alert("请输入需求数量");
+				return;
+			}
+			//9、需求月份
+			var requestMonth = $("#requestMonth").val();
+			if(null == requestMonth || "" == requestMonth) {
+				alert("请输入需求月份");
+				return;
+			}
+			//10、需求日期
+			var requestDate = $("#requestDate").val();
+			if(null == requestDate || "" == requestDate) {
+				alert("请选择物料名称");
+				return;
+			}
+			//11、需求计划名称
+			var requestPlanName = $("#requestPlanName").val();
+			if(null == requestPlanName || "" == requestPlanName) {
+				alert("需求计划名称");
+				return;
+			}
+			//12、需求计划备注
+			var requestRemarks = $("#requestRemarks").val();
+
+			//13、需求计划部门
+			var requestDeportment = $("#requestDeportment").val();
+			if(null == requestDeportment || "" == requestDeportment) {
+				alert("请选择需求计划部门");
+				return;
+			}
+			//14、货源是否确定
+			var sureSource = $("#sureSource").val();
+			if(null == sureSource || "" == sureSource) {
+				alert("请输入货源是否确定");
+			}
+			//15、期望供应商
+			var wishSupplier = $("#wishSupplier").val();
+			//16、固定供应商
+			var fixedSupplier = $("#fixedSupplier").val();
+			//17、备注
+			var remarks = $("#remarks").val();
+			//18、需求计划编码
+			var requestPlanCode = $("#requestPlanCode").val();
+			if(null == requestPlanCode || "" == requestPlanCode) {
+				alert("请输入需求计划编码");
+				return;
+			}
+			//19、供应方式
+			var supplyWay = $("#supplyWay").val();
+			if(null == supplyWay || "" == supplyWay) {
+				alert("请选择供应方式");
+			}
+			//20、供应数量
+			var supplyQuantity = $("#supplyQuantity").val();
+			if(null == supplyQuantity || "" == supplyQuantity) {
+				alert("请输入供应数量");
+			}
+			//22、可用库存
+			var availableStock = $("#availableStock").val();
+			//23、在途数量
+			var quantityRoutes = $("#quantityRoutes").val();
+			//24、已用库存
+			var usedStock = $("#usedStock").val();
+			//25、库存总量
+			var totalStock = $("#totalStock").val();
+			//25、采购提前期
+			var purchaseLeadTime = $("#purchaseLeadTime").val()
+			//27、采购日期
+			var purchaseDate = $("#purchaseDate").val()
+			if(null == purchaseDate || "" == purchaseDate) {
+				alert("请输入采购日期");
+			}
+			//28、制单人
+			var originator = $("#originator").val()
+			if(null == originator || "" == originator) {
+				alert("请输入制单人");
+			}
+			//29、物料追踪码
+			var materialTrackingCode = $("#materialTrackingCode").val()
+
+			var json = {
+				classificationCode: classificationCode,
+				classificationName: classificationName,
+				materialCode: materialCode,
+				materialName: materialName,
+				type: type,
+				specification: specification,
+				unit: unit,
+				quantity: quantity,
+				requestMonth: requestMonth,
+				requestDate: requestDate,
+				requestPlanName: requestPlanName,
+				requestRemarks: requestRemarks,
+				requestDeportment: requestDeportment,
+				sureSource: sureSource,
+				wishSupplier: wishSupplier,
+				fixedSupplier: fixedSupplier,
+				remarks: remarks,
+				requestPlanCode: requestPlanCode,
+				supplyWay: supplyWay,
+				supplyQuantity: supplyQuantity,
+				availableStock: availableStock,
+				quantityRoutes: quantityRoutes,
+				usedStock: usedStock,
+				totalStock: totalStock,
+				purchaseLeadTime: purchaseLeadTime,
+				purchaseDate: purchaseDate,
+				originator: originator,
+				materialTrackingCode: materialTrackingCode
+			}
+			$.ajax({
+				type: "POST",
+				url: "http://123.56.68.20:8080/Batik/purchase/savePurchase",
+				data: json,
+				dataType: "json",
+				success: function(result) {
+					if(result.status == 1) {
+						//成功后需要关闭当前的窗口
+						close_add_win();
+						//重新加载一遍，相当于刷新一次
+						//loadGoodsListView();
+						//重新给全局变量复制为null
+						goodsUniqueId = null;
+					}
+				}
+			});
+		}
+	</script>
+</head>
+
+<body>
+<div class="cBody">
+	<!--添加窗口部分，默认是隐藏的-->
+	<div id="add_window">
+		<div class="first_div" style="height: 140%;">
+			<div class="first_first_div">
+				新增弹出顶部
+				<div class="add_window_content_top">
+					<font id="addWinDesc">新增/编辑订单</font> <img onclick="close_add_win()" src="../images/close_btn.png" />
+				</div>
+				<!--表单上半部分内容-->
+				<div style="width: 100%; height: auto; position: relative;">
+					<div class="add_window_desc">
+						<font>* 物料分类编码:</font> <input id="classificationCode" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 物料分类名称:</font> <input id="classificationName" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 物料编码: </font> <input id="materialCode" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 物料名称: </font> <input id="materialName" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 物料规格: </font> <input type="text" id="type" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 物料型号: </font> <input type="text" id="specification" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 物料单位: </font> <input type="text" id="unit" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 需求数量: </font> <input type="text" id="quantity" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 需求月份: </font> <input type="text" id="requestMonth" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 需求日期: </font> <input type="text" id="requestDate" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 需求计划名称:</font> <input id="requestPlanName" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 需求计划备注:</font> <input id="requestRemarks" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 需求计划部门:</font> <input id="requestDeportment" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 货源是否确定:</font>
+						<select id="sureSource" name="goodsType">
+							<option value="是">是</option>
+							<option value="否">否</option>
+						</select>
+					</div>
+					<div class="add_window_desc">
+						<font>* 期望供应商:</font> <input id="wishSupplier" type="text" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 固定供应商:</font> <input type="text" id="fixedSupplier" />
+					</div>
+
+					<div class="add_window_desc">
+						<font> 物料备注:</font> <input type="text" id="remarks" />
+					</div>
+					<div class="add_window_desc">
+						<font> 需求计划编码:</font> <input type="text" id="requestPlanCode" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 供应方式:</font>
+						<select id="supplyWay" name="goodsType">
+							<option value="采购">采购</option>
+							<option value="库存供应">库存供应</option>
+						</select>
+					</div>
+					<div class="add_window_desc">
+						<font>* 供应数量:</font> <input type="text" id="supplyQuantity" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 可用库存:</font> <input type="text" id="availableStock" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 在途数量:</font> <input type="text" id="quantityRoutes" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 已用库存:</font> <input type="text" id="usedStock" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 库存总量:</font> <input type="text" id="totalStock" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 采购提前期:</font> <input type="text" id="purchaseLeadTime" />
+					</div>
+					<div class="add_window_desc">
+						<font>* 采购日期:</font> <input type="text" id="purchaseDate" />
+						<div class="add_window_desc">
+							<div class="add_window_desc">
+								<font>* 制单人:</font> <input type="text" id="originator" />
+								<div class="add_window_desc">
+									<font>* 物料追踪码:</font> <input type="text" id="materialTrackingCode" />
+								</div>
+								<!--关闭按钮-->
+								<div style="width: 100%; height: 50px; text-align: center; margin-top: 30px;">
+									<button style="width: 60px; height: 35px; background: #787878; margin-right: 20%;" onclick="close_add_win()">关闭</button>
+									<button id="saveBtn" style="width: 60px; height: 35px; background: #209e85;" onclick="addGoods()">保存</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="layui-collapse">
+		<!--模块 开始-->
+		<div class="layui-colla-item">
+			<!--顶部按钮-->
+			<div style="width: 100%;height: 70px;background: #F4F4F4;vertical-align: middle;line-height: 50px;">
+				<button id="goods_combine1" style="margin-left: 70px;margin-top:30px;width:100px;height:35px;background-color:#209E85;color: #F1F1F1;" onClick="queryRequest()">查询</button>
+				<button id="goods_combine" style="margin-left: 35px;margin-top:30px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;" onClick="msgbox(1)">合并</button>
+				<button id="goods_cancel_combine" style="margin-left: 35px;width:100px;height:35px;background-color: #209E85;color: #F1F1F1;" onclick="cancelMerge()">取消合并</button>
+
+				<button id="goods_print" style="margin-left: 30px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;" onclick="printRequest()">打印</button>
+				<button id="goods_output" style="margin-left: 30px;width:100px;height:35px;background-color:#209E85;color: #F1F1F1;" onclick="importRequest()">导出</button>
+				<!-- <button id="goods_save" style="margin-left: 30px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;" onclick="savePlan()">保存</button>-->
+			</div>
+			<div style="width: 100%;height: 10px;background: black;vertical-align: middle;line-height: 50px;">
+
+			</div>
+			<div style="width: 100%;height: 100px;background: #F4F4F4;vertical-align: middle;line-height: 50px;">
+				<button id="goods_spilt" style="margin-left: 70px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;" onclick="splitPlan()">拆分</button>
+				<button id="Need_return" style="margin-left: 35px;width:100px;height:35px;background-color: #209E85;color: #F1F1F1;" onclick="requestBack()">需求退回</button>
+				<button id="Generate_purchase " style="margin-left: 30px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;" onclick="submitRequest()">生成采购计划</button>
+				<button id="sum_rule" style="margin-left: 30px;width:100px;height:35px;background-color:#209E85;color: #F1F1F1;">汇总规则设置</button>
+				<button id="quit1" style="margin-left: 30px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;" onclick="closeWin()">关闭/退出</button>
+
+			</div>
+			<div id='inputbox' class="box">
+				<a class='x' href='' ; onclick="msgbox(0); retuenfalse">关闭</a>
+				<label style="color: #E9E9E9;zoom:150%;">
+					<input type="checkbox" name="attr" id="bianma" checked="checked" onclick="return false";>物料编码
+					<input type="checkbox" name="attr" > 需求月份
+					<input type="checkbox" name="attr" > 期望供应商
+					<input type="checkbox" name="attr" >固定供应商
+				</label>
+				<button id="quit" style="margin-left: 50px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;" onclick="merge()">确定</button>
+			</div>
+			<div class="layui-tab-item layui-show" style="overflow: auto;">
+				<table id="basicInfo" class="layui-table">
+					<thead>
+					<tr>
+						<th style="width: 10px;">行号</th>
+						<th style="width: 10px;">选择</th>
+						<th class="requestAttributes">物料分类编码</th>
+						<th class="requestAttributes">物料分类名称</th>
+						<th class="requestAttributes">物料编码</th>
+						<th class="requestAttributes">物料名称</th>
+						<th class="requestAttributes">规格</th>
+						<th class="requestAttributes">型号</th>
+						<th class="requestAttributes">单位</th>
+						<th style="width: 60px;">需求数量</th>
+						<th class="requestAttributes">需求月份</th>
+						<th class="requestAttributes">需求日期</th>
+						<th class="requestAttributes">货源是否确定</th>
+						<th style="width: 120px;">固定供应商</th>
+						<th style="width: 120px;">期望供应商</th>
+						<th class="requestAttributes">所属需求部门</th>
+						<th style="width: 120px;">所属需求计划编码</th>
+						<!--<th>供应方式</th>
+            <th>供应数量</th>
+            <th>可用库存</th>
+            <th>在途数量</th>
+            <th>已占库存</th>
+            <th>库存总量</th>
+            <th>采购提前期</th>
+            <th>采购日期</th>-->
+						<th style="width: 120px;">物料追踪码</th>
+						<th class="requestAttributes">需求退回</th>
+						<th class="requestAttributes">打印</th>
+						<th class="requestAttributes">同步数据</th>
+					</tr>
+					<tbody id="purchaseTable">
+					<tr>
+						<td>1</td>
+						<td>
+							<input type="checkbox" name="printPlan" />
+						</td>
+						<td>xxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>xxxx</td>
+						<td>
+							<button style="width:50px;height:35px;background-color:#209E85;color: #F1F1F1;">保存</button>
+						</td>
+						<td>
+							<button style="width:60px;height:35px;background-color:#209E85;color: #F1F1F1;">需求退回</button>
+						</td>
+						<td>
+							<button style="width:50px;height:35px;background-color:#209E85;color: #F1F1F1;">打印</button>
+						</td>
+						<td>
+							<button style="width:50px;height:35px;background-color:#209E85;color: #F1F1F1;">修改</button>
+						</td>
+					</tr>
+
+					</tbody>
+					</thead>
+				</table>
+			</div>
+			<script>
+				//注意：折叠面板 依赖 element 模块，否则无法进行功能性操作
+				layui.use('element', function() {
+					var element = layui.element;
+				});
+			</script>
+		</div>
+
+	</div>
+
+</div>
+</body>
+
+</html>

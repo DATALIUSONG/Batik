@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="穷在闹市" />
+		<!-- 作者 -->
+		<meta name="revised" content="穷在闹市.v3, 2019/05/01" />
+		<!-- 定义页面的最新版本 -->
+		<meta name="description" content="网站简介" />
+		<!-- 网站简介 -->
+		<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+		<title>穷在闹市出品</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="../../css/base.css">
+		<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+		<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+		<script type="text/javascript" src="../../layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+		<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="../../framework/jquery.mousewheel.min.js"></script>
+		<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+
+	</head>
+
+	<body>
+		<div class="cBody">
+			
+			<table class="layui-table">
+				<thead>
+					<tr>
+						<th>行号</th>
+						<th>选择</th>
+						<th>采购计划编号</th>
+						<th>采购计划名称</th>
+						<th>采购计划类型</th>
+						<th>审批状态</th>
+						<th>制单人</th>
+						<th>制单时间</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>1</td>
+						<td>
+						<input type="checkbox" name="bianma" id="bianma"  onclick="check()";checked>
+						</td>
+						<td>xxxxxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xx</td>
+						<td>xx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>
+						<input type="checkbox" name="bianma" id="bianma"  onclick="check()";checked>
+						</td>
+						<td>xxxxxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xx</td>
+						<td>xx</td>
+						<td>xxx</td>
+					</tr>
+					<tr>
+						<td>3</td>
+						<td>
+						<input type="checkbox" name="bianma" id="bianma"  onclick="check()";checked>
+						</td>
+						<td>xxxxxx</td>
+						<td>xxx</td>
+						<td>xxx</td>
+						<td>xx</td>
+						<td>xx</td>
+						<td>xxx</td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<!-- layUI 分页模块 -->
+			<div id="pages"></div>
+			<script>
+				layui.use(['laypage', 'layer'], function() {
+					var laypage = layui.laypage,
+						layer = layui.layer;
+				
+					//总页数大于页码总数
+					laypage.render({
+					    elem: 'pages'
+					    ,count: 100
+					    ,layout: [ 'prev', 'page', 'next', ]
+					    ,jump: function(obj){
+					      console.log(obj)
+					    }
+					});
+				});
+			</script>
+			<div class="layui-form-item layui-form-text" style="margin-top: 30px;">
+					<label class="layui-form-label">审批意见:</label>
+					<div class="layui-input-block">
+						<textarea name="desc" placeholder="请不要超过100字..." class="layui-textarea" maxlength="100" style="width: 500px;height: 40px;"></textarea>
+					</div>
+			</div>
+			<div class="batton" style="margin-top: 50px;width: 100%;height: 200px;">
+				<button id="goods_print" style="margin-left: 500px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;">审批通过</button>
+				<button id="goods_output" style="margin-left: 30px;width:100px;height:35px;background-color:#209E85;color: #F1F1F1;">审批退回</button>
+				<button id="goods_save" style="margin-left: 30px;width:100px;height:35px;background-color:#263236;color: #F1F1F1;">返回</button>
+			</div>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>My Test Document</title>
+	
+	<style>
+	.box{
+	    width:70%; margin-top:10%; margin:auto; padding:28px;
+	    height:80px; border:1px #111 solid;
+	    display:none;            /* 默认对话框隐藏 */
+	}
+	.box.show{display:block;} 
+	.box .x{ font-size:18px; text-align:right; display:block;}
+	/*.box input{width:80%; font-size:18px; margin-top:18px;}*/
+	</style>
+	<script type="text/javascript">
+		  function   check(vr)   {   
+		 	 //alert("没有被选中的"); 
+		 	var chec=document.getElementsByName("chifan");
+		 	var cf=document.getElementById("cf");
+		 	for (var int = 0; int < chec.length; int++) {
+					chec[int].disabled=true;
+				}
+		 	function code(){
+		 		alert("该项不可编辑")
+		 		this.checked
+		 	}
+//		 	if(cf.checked){
+//		 	//alert("没有被选中"); 
+//			 	for (var int = 0; int < chec.length; int++) {
+//					chec[int].disabled=false;
+//				}
+//		 	}else{
+//		 		//alert("被选中"); 
+//			 	for (var int = 0; int < chec.length; int++) {
+//					chec[int].disabled=true;
+//				}
+//		 	}	 
+		  }    	
+			</script>
+</head>  
+<body> 
+    
+    <h2>测试</h2>
+    <input type="button" onClick="msgbox(1)" value="点击弹出输入框">
+
+    <script>  
+        function msgbox(n){
+            document.getElementById('inputbox').style.display=n?'block':'none';     /* 点击按钮打开/关闭 对话框 */
+        }
+     </script>  
+     
+     <div id='inputbox' class="box">
+        <a class='x' href=''; onclick="msgbox(0); return false;">关闭</a>
+        <input type="checkbox" name="cf" id="cf" checked onclick="return false";>物料编码
+		<input type="checkbox" name="chifan" > 需求月份
+		 <input type="checkbox" name="chifan" > 期望供应商 
+		<input type="checkbox" name="chifan" >固定供应商
+        <input type="button" value="确定">
+     </div>
+</body> 
